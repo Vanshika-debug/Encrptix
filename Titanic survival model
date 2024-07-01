@@ -1,0 +1,51 @@
+import pandas as pd
+
+# Load the dataset
+file_path = '/mnt/data/Titanic-Dataset.csv'
+titanic_data = pd.read_csv(file_path)
+
+# Display the first few rows of the dataset
+titanic_data.head()
+# Check for missing values
+titanic_data.isnull().sum()
+# Fill missing values for Age with the median age
+titanic_data['Age'].fillna(titanic_data['Age'].median(), inplace=True)
+
+# Drop the Cabin column
+titanic_data.drop(columns=['Cabin'], inplace=True)
+
+# Fill missing values for Embarked with the most common value
+titanic_data['Embarked'].fillna(titanic_data['Embarked'].mode()[0], inplace=True)
+
+# Encode categorical variables
+titanic_data = pd.get_dummies(titanic_data, columns=['Sex', 'Embarked'], drop_first=True)
+
+# Drop unnecessary columns
+titanic_data.drop(columns=['PassengerId', 'Name', 'Ticket'], inplace=True)
+
+# Display the first few rows of the cleaned dataset
+titanic_data.head()
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+# Define features and target variable
+X = titanic_data.drop(columns=['Survived'])
+y = titanic_data['Survived']
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Initialize and train the logistic regression model
+model = LogisticRegression(max_iter=1000)
+model.fit(X_train, y_train)
+
+# Make predictions on the test set
+y_pred = model.predict(X_test)
+
+# Evaluate the model
+accuracy = accuracy_score(y_test, y_pred)
+report = classification_report(y_test, y_pred)
+conf_matrix = confusion_matrix(y_test, y_pred)
+
+accuracy, report, conf_matrix
